@@ -24,6 +24,8 @@ namespace glen {
   public:
     tree(TSTree * t) : m_t { t } {}
 
+    constexpr operator TSTree *() const { return m_t; }
+
     auto root_node() { return ts_tree_root_node(m_t); }
   };
 
@@ -35,6 +37,8 @@ namespace glen {
       ts_parser_set_language(m_p, lang());
     }
 
+    constexpr operator TSParser *() const { return m_p; }
+
     auto parse(jute::view src) {
       return tree { ts_parser_parse_string(m_p, nullptr, src.begin(), src.size()) };
     }
@@ -44,5 +48,6 @@ namespace glen {
 int main() {
   glen::parser p { glen::lang::cpp };
   auto t = p.parse(jojo::read_cstr("poc.cpp"));
+
   putln(ts_node_string(t.root_node()));
 }
