@@ -2,7 +2,10 @@
 
 import glen;
 import jojo;
+import jute;
 import print;
+
+using namespace jute::literals;
 
 int main() try {
   auto src = jojo::read_cstr("glen.cppm");
@@ -14,7 +17,7 @@ int main() try {
 
   t.for_each_capture(R"(
     (import_declaration (module_name (identifier) @imp))
-  )", [src=src.begin()](auto & n) {
+  )"_s, [src=src.begin()](auto & n) {
     auto s = ts_node_start_byte(n);
     auto e = ts_node_end_byte(n);
     putfn("  imported %.*s", e - s, src + s);
@@ -22,7 +25,7 @@ int main() try {
 
   t.for_each_capture(R"(
     (preproc_include (string_literal (string_content)) @inc)
-  )", [src=src.begin()](auto & n) {
+  )"_s, [src=src.begin()](auto & n) {
     auto s = ts_node_start_byte(n);
     auto e = ts_node_end_byte(n);
     putfn("  included %.*s", e - s, src + s);
@@ -30,11 +33,11 @@ int main() try {
 
   t.for_each_capture(R"(
     (preproc_call) @pp
-  )", [&t,src=src.begin()](auto & n) {
+  )"_s, [&t,src=src.begin()](auto & n) {
     t.query(R"(
       (_ directive: (_) @d
          argument: (_) @a)
-    )").for_each_match(n, [src](auto & m) {
+    )"_s).for_each_match(n, [src](auto & m) {
       auto s = ts_node_start_byte(m.captures[0].node);
       auto e = ts_node_end_byte(m.captures[0].node);
       putfn("  pp %.*s", e - s, src + s);

@@ -9,7 +9,6 @@ const TSLanguage * tree_sitter_java();
 
 export module glen;
 import hay;
-import jute;
 
 export namespace glen::lang {
   using t = const TSLanguage * (*)();
@@ -33,7 +32,7 @@ export namespace glen {
   class query {
     hay<TSQuery *, nullptr, ts_query_delete> m_q;
 
-    static auto create(const TSLanguage * lang, jute::view src) {
+    static auto create(const TSLanguage * lang, const auto & src) {
       unsigned err_ofs {};
       TSQueryError err {};
       auto q = ts_query_new(lang, src.begin(), src.size(), &err_ofs, &err);
@@ -41,7 +40,7 @@ export namespace glen {
       return q;
     }
   public:
-    query(const TSLanguage * lang, jute::view src) : m_q { create(lang, src) } {}
+    query(const TSLanguage * lang, const auto & src) : m_q { create(lang, src) } {}
 
     constexpr operator TSQuery *() const { return m_q; }
 
@@ -77,13 +76,13 @@ export namespace glen {
     auto root_node() const { return ts_tree_root_node(m_t); }
     auto language() const { return ts_tree_language(m_t); }
 
-    auto query(jute::view src) const {
+    auto query(const auto & src) const {
       return glen::query { language(), src };
     }
-    void for_each_capture(jute::view src, auto && fn) const {
+    void for_each_capture(const auto & src, auto && fn) const {
       query(src).for_each_capture(root_node(), fn);
     }
-    void for_each_match(jute::view src, auto && fn) const {
+    void for_each_match(const auto & src, auto && fn) const {
       query(src).for_each_match(root_node(), fn);
     }
   };
@@ -98,7 +97,7 @@ export namespace glen {
 
     constexpr operator TSParser *() const { return m_p; }
 
-    auto parse(jute::view src) {
+    auto parse(const auto & src) {
       return tree { ts_parser_parse_string(m_p, nullptr, src.begin(), src.size()) };
     }
   };
