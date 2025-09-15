@@ -1,4 +1,8 @@
 #pragma leco test
+// TODO: remove this after wrapping enough utilities
+extern "C" {
+#include "tree-sitter/lib/include/tree_sitter/api.h"
+}
 
 import glen;
 import jojo;

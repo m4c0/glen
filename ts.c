@@ -1,4 +1,5 @@
 #pragma leco add_impl ts-cpp
+#pragma leco add_impl ts-glsl
 #pragma leco add_impl ts-java
 #pragma leco add_include_dir "tree-sitter/lib/include"
 #pragma leco add_include_dir "tree-sitter/lib/src"

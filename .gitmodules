@@ -7,3 +7,6 @@
 [submodule "tree-sitter-java"]
 	path = tree-sitter-java
 	url = git@github.com:tree-sitter/tree-sitter-java.git
+[submodule "tree-sitter-glsl"]
+	path = tree-sitter-glsl
+	url = git@github.com:tree-sitter-grammars/tree-sitter-glsl.git
