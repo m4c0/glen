@@ -76,6 +76,16 @@ namespace glen {
 
     auto root_node() const { return ts_tree_root_node(m_t); }
     auto language() const { return ts_tree_language(m_t); }
+
+    auto query(jute::view src) const {
+      return glen::query { language(), src };
+    }
+    void for_each_capture(jute::view src, auto && fn) const {
+      query(src).for_each_capture(root_node(), fn);
+    }
+    void for_each_match(jute::view src, auto && fn) const {
+      query(src).for_each_match(root_node(), fn);
+    }
   };
 
   class parser {
@@ -100,13 +110,40 @@ int main() try {
   glen::parser p { glen::lang::cpp };
   auto t = p.parse(src);
 
-  glen::query q { t.language(), R"(
+  //putln(ts_node_string(t.root_node()));
+
+  t.for_each_capture(R"(
     (import_declaration (module_name (identifier) @imp))
-  )" };
-  q.for_each_capture(t.root_node(), [src=src.begin()](auto & n) {
+  )", [src=src.begin()](auto & n) {
     auto s = ts_node_start_byte(n);
     auto e = ts_node_end_byte(n);
     putfn("  imported %.*s", e - s, src + s);
+  });
+
+  t.for_each_capture(R"(
+    (preproc_include (string_literal (string_content)) @inc)
+  )", [src=src.begin()](auto & n) {
+    auto s = ts_node_start_byte(n);
+    auto e = ts_node_end_byte(n);
+    putfn("  included %.*s", e - s, src + s);
+  });
+
+  t.for_each_capture(R"(
+    (preproc_call) @pp
+  )", [&t,src=src.begin()](auto & n) {
+    t.query(R"(
+      (_ directive: (_) @d
+         argument: (_) @a)
+    )").for_each_match(n, [src](auto & m) {
+      auto s = ts_node_start_byte(m.captures[0].node);
+      auto e = ts_node_end_byte(m.captures[0].node);
+      putfn("  pp %.*s", e - s, src + s);
+
+      s = ts_node_start_byte(m.captures[1].node);
+      e = ts_node_end_byte(m.captures[1].node);
+      putfn("     %.*s", e - s, src + s);
+
+    });
   });
 } catch (TSQueryError e) {
   errln("query error ", static_cast<unsigned>(e));
