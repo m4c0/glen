@@ -19,6 +19,54 @@ namespace glen::lang {
   constexpr const auto java = tree_sitter_java;
 };
 namespace glen {
+  class cursor {
+    hay<TSQueryCursor *, ts_query_cursor_new, ts_query_cursor_delete> m_c {};
+
+  public:
+    cursor(TSQuery * q, TSNode n) {
+      ts_query_cursor_exec(m_c, q, n);
+    }
+
+    constexpr operator TSQueryCursor *() const { return m_c; }
+  };
+
+  class query {
+    hay<TSQuery *, nullptr, ts_query_delete> m_q;
+
+    static auto create(const TSLanguage * lang, jute::view src) {
+      unsigned err_ofs {};
+      TSQueryError err {};
+      auto q = ts_query_new(lang, src.begin(), src.size(), &err_ofs, &err);
+      if (err) throw err;
+      return q;
+    }
+  public:
+    query(const TSLanguage * lang, jute::view src) : m_q { create(lang, src) } {}
+
+    constexpr operator TSQuery *() const { return m_q; }
+
+    auto exec(TSNode n) const { return cursor { m_q, n }; }
+
+    void for_each_capture(TSNode n, auto && fn) const {
+      auto c = exec(n);
+      
+      TSQueryMatch match {};
+      unsigned idx {};
+      while (ts_query_cursor_next_capture(c, &match, &idx)) {
+        fn(match.captures[idx].node);
+      }
+    }
+
+    void for_each_match(TSNode n, auto && fn) const {
+      auto c = exec(n);
+      
+      TSQueryMatch match {};
+      while (ts_query_cursor_next_match(c, &match)) {
+        fn(static_cast<const TSQueryMatch &>(match));
+      }
+    }
+  };
+
   class tree {
     hay<TSTree *, nullptr, ts_tree_delete> m_t;
   public:
@@ -26,7 +74,8 @@ namespace glen {
 
     constexpr operator TSTree *() const { return m_t; }
 
-    auto root_node() { return ts_tree_root_node(m_t); }
+    auto root_node() const { return ts_tree_root_node(m_t); }
+    auto language() const { return ts_tree_language(m_t); }
   };
 
   class parser {
@@ -45,9 +94,21 @@ namespace glen {
   };
 }
 
-int main() {
-  glen::parser p { glen::lang::cpp };
-  auto t = p.parse(jojo::read_cstr("poc.cpp"));
+int main() try {
+  auto src = jojo::read_cstr("poc.cpp");
 
-  putln(ts_node_string(t.root_node()));
+  glen::parser p { glen::lang::cpp };
+  auto t = p.parse(src);
+
+  glen::query q { t.language(), R"(
+    (import_declaration (module_name (identifier) @imp))
+  )" };
+  q.for_each_capture(t.root_node(), [src=src.begin()](auto & n) {
+    auto s = ts_node_start_byte(n);
+    auto e = ts_node_end_byte(n);
+    putfn("  imported %.*s", e - s, src + s);
+  });
+} catch (TSQueryError e) {
+  errln("query error ", static_cast<unsigned>(e));
+  return 1;
 }
