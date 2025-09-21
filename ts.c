@@ -4,6 +4,8 @@
 #pragma leco add_include_dir "tree-sitter/lib/include"
 #pragma leco add_include_dir "tree-sitter/lib/src"
 
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+
 #if __has_include(<tree_sitter/api.h>)
 #include "tree-sitter/lib/src/lib.c"
 #endif
