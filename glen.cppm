@@ -97,8 +97,11 @@ export namespace glen {
 
     constexpr operator TSParser *() const { return m_p; }
 
+    auto parse(const char * data, unsigned size) {
+      return tree { ts_parser_parse_string(m_p, nullptr, data, size) };
+    }
     auto parse(const auto & src) {
-      return tree { ts_parser_parse_string(m_p, nullptr, src.begin(), src.size()) };
+      return parse(src.begin(), src.size());
     }
   };
 }
