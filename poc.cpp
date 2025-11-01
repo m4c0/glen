@@ -14,7 +14,7 @@ using namespace jute::literals;
 int main() try {
   auto src = jojo::read_cstr("glen.cppm");
 
-  glen::parser p { glen::lang::cpp };
+  glen::parser p { tree_sitter_cpp };
   auto t = p.parse(src);
 
   //putln(ts_node_string(t.root_node()));

@@ -3,21 +3,19 @@ module;
 
 extern "C" {
 #include "tree-sitter/lib/include/tree_sitter/api.h"
-const TSLanguage * tree_sitter_cpp();
-const TSLanguage * tree_sitter_glsl();
-const TSLanguage * tree_sitter_java();
 }
 
 export module glen;
 import hay;
 
-export namespace glen::lang {
-  using t = const TSLanguage * (*)();
-  constexpr const auto cpp  = tree_sitter_cpp;
-  constexpr const auto glsl = tree_sitter_glsl;
-  constexpr const auto java = tree_sitter_java;
-};
+export extern "C" {
+  const TSLanguage * tree_sitter_cpp();
+  const TSLanguage * tree_sitter_glsl();
+  const TSLanguage * tree_sitter_java();
+}
+
 export namespace glen {
+  using lang = const TSLanguage * (*)();
   using query_error = TSQueryError;
 
   class cursor {
@@ -93,7 +91,7 @@ export namespace glen {
     hay<TSParser *, ts_parser_new, ts_parser_delete> m_p {};
 
   public:
-    parser(lang::t lang) {
+    parser(lang lang) {
       ts_parser_set_language(m_p, lang());
     }
 
