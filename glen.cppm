@@ -14,7 +14,7 @@ import hay;
 export namespace glen::lang {
   using t = const TSLanguage * (*)();
   constexpr const auto cpp  = tree_sitter_cpp;
-  constexpr const auto glsl  = tree_sitter_glsl;
+  constexpr const auto glsl = tree_sitter_glsl;
   constexpr const auto java = tree_sitter_java;
 };
 export namespace glen {
