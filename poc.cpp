@@ -19,6 +19,17 @@ int main() try {
 
   //putln(ts_node_string(t.root_node()));
 
+  t.for_each_match(R"(
+    (module_declaration name: (module_name (identifier) @mod) partition: (module_partition (module_name (identifier) @part)) )
+  )"_s, [src=src.begin()](auto & m) {
+    auto s = ts_node_start_byte(m.captures[0].node);
+    auto e = ts_node_end_byte(m.captures[0].node);
+    putfn("  module %.*s", e - s, src + s);
+
+    s = ts_node_start_byte(m.captures[1].node);
+    e = ts_node_end_byte(m.captures[1].node);
+    putfn("         %.*s", e - s, src + s);
+  });
   t.for_each_capture(R"(
     (import_declaration (module_name (identifier) @imp))
   )"_s, [src=src.begin()](auto & n) {
