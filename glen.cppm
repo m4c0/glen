@@ -18,11 +18,11 @@ export namespace glen {
   using lang = const TSLanguage * (*)();
   using query_error = TSQueryError;
 
-  class cursor {
+  class query_cursor {
     hay<TSQueryCursor *, ts_query_cursor_new, ts_query_cursor_delete> m_c {};
 
   public:
-    cursor(TSQuery * q, TSNode n) {
+    query_cursor(TSQuery * q, TSNode n) {
       ts_query_cursor_exec(m_c, q, n);
     }
 
@@ -44,7 +44,7 @@ export namespace glen {
 
     constexpr operator TSQuery *() const { return m_q; }
 
-    auto exec(TSNode n) const { return cursor { m_q, n }; }
+    auto exec(TSNode n) const { return query_cursor { m_q, n }; }
 
     void for_each_capture(TSNode n, auto && fn) const {
       auto c = exec(n);

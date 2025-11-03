@@ -1,4 +1,4 @@
-#pragma leco test
+#pragma leco tool
 // TODO: remove this after wrapping enough utilities
 extern "C" {
 #include "tree-sitter/lib/include/tree_sitter/api.h"
